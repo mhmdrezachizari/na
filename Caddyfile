@@ -1,0 +1,41 @@
+{
+	email {$ACME_EMAIL}
+}
+
+www.webdevhub.ir {
+	redir https://webdevhub.ir{uri} permanent
+}
+
+webdevhub.ir {
+	encode zstd gzip
+
+	@backend path \
+		/admin* \
+		/accounts/* \
+		/products/* \
+		/order/* \
+		/article/* \
+		/customadmin/* \
+		/freecourses/* \
+		/static/*
+
+	handle @backend {
+		reverse_proxy backend:8000
+	}
+
+	handle_path /media/* {
+		root * /srv/media
+		file_server
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
